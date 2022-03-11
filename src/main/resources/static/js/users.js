@@ -64,7 +64,7 @@ class UsersList extends React.Component {
 				)
 			);
 		} else if (!this.props.users || this.props.users.length === 0) {
-			return React.createElement("p", { className: "mb-4" }, "No users to show.");
+			return React.createElement("p", { className: "mb-0" }, "No users to show.");
 		} else {
 			this.props.users.forEach((user) => {
 				var user = React.createElement("div", { className: "p-3 border-bottom", key: user.id }, 
