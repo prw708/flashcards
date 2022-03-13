@@ -99,7 +99,9 @@ class Notification extends React.Component {
 	componentDidMount() {
 		this.interval = setInterval(function() {
 			this.toggle = !this.toggle;
-			if (this.toggle && this.props.notifications.length > 0) {
+			if (this.toggle && this.props.notifications.length === 1) {
+				document.title = "(" + this.props.notifications.length + ") New Chat Invitation - Chat Application";
+			} else if (this.toggle && this.props.notifications.length > 1) {
 				document.title = "(" + this.props.notifications.length + ") New Chat Invitations - Chat Application";
 			} else {
 				document.title = "Home - Chat Application";
@@ -202,7 +204,12 @@ class UsersContainer extends React.Component {
 	
 	handleAcceptChat(username, chatWith) {
 		this.setStatus(this.loggedInAs, "BUSY");
-		this.removeNotification(username, chatWith);
+		this.stompClient.send("/send/notification", {}, JSON.stringify({
+			username: username,
+			chatWith: chatWith,
+			notifiedOn: new Date(),
+			acknowledged: true
+		}));
 	}
 	
 	handleCloseNotification(username, chatWith) {
@@ -239,9 +246,15 @@ class UsersContainer extends React.Component {
 		this.stompClient.connect({}, function(frame) {
 			this.stompClient.subscribe("/receive/done", function(message) {
 				var content = JSON.parse(message.body);
-				this.setStatus(content.user1, "AVAILABLE");
-				this.setStatus(content.user2, "AVAILABLE");
-				this.removeNotification(content.user1, content.user2);
+				resetStatus(content.user1, content.user2)
+					.then(function(statuses) {
+						this.setStatus(statuses.user1, statuses.user1Status);
+						this.setStatus(statuses.user2, statuses.user2Status);
+						this.removeNotification(content.user1, content.user2);
+					}.bind(this))
+					.catch(function() {
+						this.removeNotification(content.user1, content.user2);
+					}.bind(this));
 			}.bind(this));
 			this.stompClient.subscribe("/receive/notification", function(message) {
 				var content = JSON.parse(message.body);
@@ -255,6 +268,8 @@ class UsersContainer extends React.Component {
 					this.setState({
 						notifications: notifications
 					});
+				} else if (content.acknowledged) {
+					this.removeNotification(content.username, content.chatWith);
 				}
 			}.bind(this));
 		}.bind(this));

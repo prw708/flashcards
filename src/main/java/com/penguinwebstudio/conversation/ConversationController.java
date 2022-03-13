@@ -110,6 +110,18 @@ public class ConversationController {
 		return true;
 	}
 	
+	@ResponseBody
+	@GetMapping(path="/reset")
+	public ResetStatusMessage resetStatus(
+			@Pattern(regexp="^[A-Za-z0-9\\-_]+$") @RequestParam("user1") String user1,
+			@Pattern(regexp="^[A-Za-z0-9\\-_]+$") @RequestParam("user2") String user2
+			) {
+		if (user1 == null || user2 == null) {
+			return null;
+		}
+		return conversationService.resetStatus(user1, user2);
+	}
+	
 	@GetMapping(path="/chat")
 	public String chat(
 			Model model,
@@ -152,7 +164,7 @@ public class ConversationController {
 		);
 		conversationService.addChatMessage(newMessage);
 		List<ChatMessage> conversation = conversationService.getAllChatRoomMessages(message.getChatRoom());
-		if (message.getCpu() && message.getMessage().equals("The conversation has been ended.")) {
+		if (message.getCpu() && message.getMessage().equals("The conversation has ended.")) {
 			deleteConversation(new DoneMessage(message.getChatRoom().toString(), message.getUsername(), message.getChatWith()));
 		}
 		this.simpMessagingTemplate.convertAndSend("/receive/" + chatRoomId + "/message", conversation);

@@ -19,12 +19,16 @@ public class ChatRoom {
 	@Column(name="user2")
 	private String user2;
 	
+	@Column(name="active")
+	private boolean active;
+	
 	protected ChatRoom() {
 	}
 	
 	public ChatRoom(String user1, String user2) {
 		this.user1 = user1;
 		this.user2 = user2;
+		this.active = false;
 	}
 	
 	public Long getId() {
@@ -35,6 +39,14 @@ public class ChatRoom {
 		return this.user1;
 	}
 	
+	public String getUser2() {
+		return this.user2;
+	}
+	
+	public boolean getActive() {
+		return this.active;
+	}
+	
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -43,12 +55,12 @@ public class ChatRoom {
 		this.user1 = user1;
 	}
 	
-	public String getUser2() {
-		return this.user2;
-	}
-	
 	public void setUser2(String user2) {
 		this.user2 = user2;
+	}
+	
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 	
 }

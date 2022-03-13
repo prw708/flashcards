@@ -41,6 +41,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				}
 				conversationService.addUser(username);
 				conversationService.updateLastAction(username, "AVAILABLE");
+				conversationService.deleteUserConversations(username);
 				return new UsernamePasswordAuthenticationToken(username, password, grantedAuths);
 			} else {
 				throw new BadCredentialsException("Invalid username or password.");

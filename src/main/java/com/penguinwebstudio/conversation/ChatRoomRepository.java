@@ -13,6 +13,8 @@ public interface ChatRoomRepository extends CrudRepository<ChatRoom, Long> {
 	
 	public List<ChatRoom> findByUser2(String user2);
 	
+	public List<ChatRoom> findByActive(boolean active);
+	
 	public void deleteById(Long id);
 	
 	public long count();

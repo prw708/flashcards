@@ -48,7 +48,7 @@ class ChatStatus extends React.Component {
 	render() {
 		if (!this.props.active) {
 			return React.createElement("small", { 
-				className: "text-muted mx-4", 
+				className: "text-muted mx-4 mx-sm-0 my-sm-2 mx-md-4 d-sm-block d-md-inline", 
 			}, "The conversation has ended.");
 		}
 		switch (this.props.chatWithStatus) {
@@ -66,7 +66,7 @@ class ChatStatus extends React.Component {
 				this.statusText = this.props.chatWith + " is disconnected.";
 		}
 		return React.createElement("small", { 
-			className: "text-muted mx-4", 
+			className: "text-muted mx-4 mx-sm-0 my-sm-2 mx-md-4 d-sm-block d-md-inline", 
 		}, this.statusText);
 	}
 }
@@ -191,7 +191,7 @@ class ChatContainer extends React.Component {
 		this.stompClient.connect({}, function(frame) {
 			this.stompClient.subscribe("/receive/" + this.chatRoom + "/message", function(message) {
 				var content = JSON.parse(message.body);
-				if (content[content.length - 1].cpu && content[content.length - 1].message === "The conversation has been ended.") {
+				if (content[content.length - 1].cpu && content[content.length - 1].message === "The conversation has ended.") {
 					this.stompClient.send("/send/done", {}, JSON.stringify({
 						chatRoomId: this.chatRoom,
 						user1: this.loggedInAs,
@@ -237,7 +237,9 @@ class ChatContainer extends React.Component {
 			this.toggle = !this.toggle;
 			if (!this.state.active) {
 				document.title = "Chat with " + this.chatWith + " Ended - Chat Application";
-			} else if (this.toggle && (this.messagesReceived.length - this.readMessages.length) > 0) {
+			} else if (this.toggle && (this.messagesReceived.length - this.readMessages.length) === 1) {
+				document.title = "(" + (this.messagesReceived.length - this.readMessages.length) + ") New Message - Chat Application";
+			} else if (this.toggle && (this.messagesReceived.length - this.readMessages.length) > 1) {
 				document.title = "(" + (this.messagesReceived.length - this.readMessages.length) + ") New Messages - Chat Application";
 			} else {
 				document.title = "Chat with " + this.chatWith + " - Chat Application";
@@ -328,7 +330,7 @@ class ChatContainer extends React.Component {
 			username: "CPU",
 			chatWith: this.chatWith,
 			postedOn: new Date(),
-			message: "The conversation has been ended.",
+			message: "The conversation has ended.",
 			cpu: true
 		};
 		var conversationChain = this.state.conversation;
