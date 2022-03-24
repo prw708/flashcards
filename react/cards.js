@@ -187,6 +187,7 @@ class Card extends React.Component {
 	}
 	
 	handleTextChange(event) {
+		this.textInput.current.style.height = "auto";
 		this.textInput.current.style.height = this.textInput.current.scrollHeight + "px";
 		this.props.onTextChange(event.target.value);
 	}
@@ -251,7 +252,10 @@ class Card extends React.Component {
 				<div className="card-body">
 					<form>
 						<textarea
-							className="form-control fs-2 lh-1 border-0 text-center py-5 bg-white"
+							className={this.props.validCards.length > 0 && this.props.validCards[this.props.index] === false ? 
+								"form-control is-invalid fs-2 border-0 text-center py-5 bg-white" :
+								"form-control fs-2 border-0 text-center py-5 bg-white"
+							}
 							value={this.props.cards.length > 0 ? 
 									(this.props.front 
 									? this.props.cards[this.props.index].front
@@ -260,6 +264,7 @@ class Card extends React.Component {
 							onChange={this.handleTextChange}
 							ref={this.textInput}
 							readOnly={this.props.viewOnly ? true : false}
+							style={{resize: "none"}}
 						>
 						</textarea>
 					</form>
@@ -295,6 +300,7 @@ class CardsContainer extends React.Component {
 		this.handleTextChange = this.handleTextChange.bind(this);
 		this.validTitle = true;
 		this.validPublic = true;
+		this.validCards = [];
 		this.pileId = DOM_CONTAINER.getAttribute("data-pileId");
 		this.viewOnly = DOM_CONTAINER.getAttribute("data-viewOnly");
 		this.pileDoesNotExist = DOM_CONTAINER.getAttribute("data-pileDoesNotExist");
@@ -315,6 +321,9 @@ class CardsContainer extends React.Component {
 		load("/load", data)
 		.then(function(json) {
 			if (json && json.cards) {
+				for (var i = 0; i < json.cards.length; i++) {
+					this.validCards.push(true);
+				}
 				this.setState({
 					title: json.title,
 					public: json.makePublic,
@@ -350,6 +359,11 @@ class CardsContainer extends React.Component {
 	
 	handleTextChange(value) {
 		if (this.state.cards.length > 0) {
+			if (value.length < 1000) {
+				this.validCards[this.state.index] = true;
+			} else {
+				this.validCards[this.state.index] = false;
+			}
 			var updatedCards = this.state.cards;
 			if (this.state.front) {
 				updatedCards[this.state.index].front = value;
@@ -377,6 +391,7 @@ class CardsContainer extends React.Component {
 			back: ""
 		};
 		newCards.splice(this.state.index + 1, 0, newElement);
+		this.validCards.splice(this.state.index + 1, 0, true);
 		var newIndex = 0;
 		if (this.state.cards.length > 0) {
 			newIndex = this.state.index >= newCards.length - 1 ? newCards.length - 1 : this.state.index + 1;
@@ -392,6 +407,13 @@ class CardsContainer extends React.Component {
 	handleDelete() {
 		var current = this.state.cards;
 		current.splice(this.state.index, 1);
+		this.validCards.splice(this.state.index, 1);
+		if (this.state.index >= this.state.cards.length - 1) {
+			this.setState({
+				index: this.state.cards.length - 1,
+				typedIndex: this.state.cards.length
+			});
+		}
 		this.setState({
 			cards: current,
 			front: true
@@ -421,14 +443,23 @@ class CardsContainer extends React.Component {
 	}
 	
 	handleSave() {
-		this.handleTitleChange(this.state.title);
-		this.handlePublicChange(this.state.public);
-		if (!this.validTitle || !this.validPublic) {
-			return false;
-		}
 		this.setState({
 			saving: true
 		});
+		this.handleTitleChange(this.state.title);
+		this.handlePublicChange(this.state.public);
+		if (!this.validTitle || !this.validPublic || !this.validCards.every((val) => val === true)) {
+			this.setState({
+				success: "Validation errors.",
+				saving: false
+			});
+			setTimeout(function() {
+				this.setState({
+					success: null
+				});
+			}.bind(this), 3000);
+			return false;
+		}
 		var data = {
 			pileId: this.pileId,
 			title: this.state.title,
@@ -515,6 +546,7 @@ class CardsContainer extends React.Component {
 				onTextChange={this.handleTextChange}
 				onPrevious={this.handlePrevious} 
 				onNext={this.handleNext}
+				validCards={this.validCards}
 				viewOnly={this.viewOnly}
 			/>
 		</React.Fragment>;

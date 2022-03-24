@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.Size;
 
 @Entity
 public class Card {
@@ -19,10 +20,12 @@ public class Card {
 	@Column(name="pile")
 	private Long pile;
 	
-	@Column(name="front", length=10000)
+	@Size(min=0, max=1000)
+	@Column(name="front", length=1000)
 	private String front;
 	
-	@Column(name="back", length=10000)
+	@Size(min=0, max=1000)
+	@Column(name="back", length=1000)
 	private String back;
 	
 	protected Card() {

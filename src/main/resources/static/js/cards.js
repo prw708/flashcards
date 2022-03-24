@@ -294,6 +294,7 @@ var Card = function (_React$Component4) {
 	}, {
 		key: "handleTextChange",
 		value: function handleTextChange(event) {
+			this.textInput.current.style.height = "auto";
 			this.textInput.current.style.height = this.textInput.current.scrollHeight + "px";
 			this.props.onTextChange(event.target.value);
 		}
@@ -399,11 +400,12 @@ var Card = function (_React$Component4) {
 							"form",
 							null,
 							React.createElement("textarea", {
-								className: "form-control fs-2 lh-1 border-0 text-center py-5 bg-white",
+								className: this.props.validCards.length > 0 && this.props.validCards[this.props.index] === false ? "form-control is-invalid fs-2 border-0 text-center py-5 bg-white" : "form-control fs-2 border-0 text-center py-5 bg-white",
 								value: this.props.cards.length > 0 ? this.props.front ? this.props.cards[this.props.index].front : this.props.cards[this.props.index].back : "",
 								onChange: this.handleTextChange,
 								ref: this.textInput,
-								readOnly: this.props.viewOnly ? true : false
+								readOnly: this.props.viewOnly ? true : false,
+								style: { resize: "none" }
 							})
 						)
 					)
@@ -446,6 +448,7 @@ var CardsContainer = function (_React$Component5) {
 		_this5.handleTextChange = _this5.handleTextChange.bind(_this5);
 		_this5.validTitle = true;
 		_this5.validPublic = true;
+		_this5.validCards = [];
 		_this5.pileId = DOM_CONTAINER.getAttribute("data-pileId");
 		_this5.viewOnly = DOM_CONTAINER.getAttribute("data-viewOnly");
 		_this5.pileDoesNotExist = DOM_CONTAINER.getAttribute("data-pileDoesNotExist");
@@ -468,6 +471,9 @@ var CardsContainer = function (_React$Component5) {
 			};
 			load("/load", data).then(function (json) {
 				if (json && json.cards) {
+					for (var i = 0; i < json.cards.length; i++) {
+						this.validCards.push(true);
+					}
 					this.setState({
 						title: json.title,
 						public: json.makePublic,
@@ -504,6 +510,11 @@ var CardsContainer = function (_React$Component5) {
 		key: "handleTextChange",
 		value: function handleTextChange(value) {
 			if (this.state.cards.length > 0) {
+				if (value.length < 1000) {
+					this.validCards[this.state.index] = true;
+				} else {
+					this.validCards[this.state.index] = false;
+				}
 				var updatedCards = this.state.cards;
 				if (this.state.front) {
 					updatedCards[this.state.index].front = value;
@@ -533,6 +544,7 @@ var CardsContainer = function (_React$Component5) {
 				back: ""
 			};
 			newCards.splice(this.state.index + 1, 0, newElement);
+			this.validCards.splice(this.state.index + 1, 0, true);
 			var newIndex = 0;
 			if (this.state.cards.length > 0) {
 				newIndex = this.state.index >= newCards.length - 1 ? newCards.length - 1 : this.state.index + 1;
@@ -549,6 +561,13 @@ var CardsContainer = function (_React$Component5) {
 		value: function handleDelete() {
 			var current = this.state.cards;
 			current.splice(this.state.index, 1);
+			this.validCards.splice(this.state.index, 1);
+			if (this.state.index >= this.state.cards.length - 1) {
+				this.setState({
+					index: this.state.cards.length - 1,
+					typedIndex: this.state.cards.length
+				});
+			}
 			this.setState({
 				cards: current,
 				front: true
@@ -581,14 +600,25 @@ var CardsContainer = function (_React$Component5) {
 	}, {
 		key: "handleSave",
 		value: function handleSave() {
-			this.handleTitleChange(this.state.title);
-			this.handlePublicChange(this.state.public);
-			if (!this.validTitle || !this.validPublic) {
-				return false;
-			}
 			this.setState({
 				saving: true
 			});
+			this.handleTitleChange(this.state.title);
+			this.handlePublicChange(this.state.public);
+			if (!this.validTitle || !this.validPublic || !this.validCards.every(function (val) {
+				return val === true;
+			})) {
+				this.setState({
+					success: "Validation errors.",
+					saving: false
+				});
+				setTimeout(function () {
+					this.setState({
+						success: null
+					});
+				}.bind(this), 3000);
+				return false;
+			}
 			var data = {
 				pileId: this.pileId,
 				title: this.state.title,
@@ -678,6 +708,7 @@ var CardsContainer = function (_React$Component5) {
 					onTextChange: this.handleTextChange,
 					onPrevious: this.handlePrevious,
 					onNext: this.handleNext,
+					validCards: this.validCards,
 					viewOnly: this.viewOnly
 				})
 			);
