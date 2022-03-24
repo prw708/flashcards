@@ -1,4 +1,4 @@
-package com.penguinwebstudio.chat;
+package com.penguinwebstudio.flashcards;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -68,7 +68,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			);
 		http.addFilterBefore(getLoginAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 		http.authorizeRequests()
-				.antMatchers("/", "/all", "/set", "/get", "/reset", "/websocket/**", "/webjars/**", "/resources/**", "/css/**", "/js/**", "/images/**").permitAll()
+				.antMatchers("/", "/view/**", "/load/**", "/rate/**", "/resources/**", "/css/**", "/js/**", "/images/**").permitAll()
 				.anyRequest().authenticated()
 				.and()
 			.formLogin()
@@ -78,13 +78,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				.permitAll()
 				.and()
 			.logout()
-				.addLogoutHandler(customLogoutHandler())
 				.permitAll();
-	}
-	
-	@Bean
-	public CustomLogoutHandler customLogoutHandler() {
-		return new CustomLogoutHandler();
 	}
 	
 	@Autowired

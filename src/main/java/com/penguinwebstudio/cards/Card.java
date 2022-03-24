@@ -1,6 +1,4 @@
-package com.penguinwebstudio.conversation;
-
-import java.util.Date;
+package com.penguinwebstudio.cards;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,96 +7,72 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-public class ChatMessage {
+public class Card {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	private Long id;
 	
-	@Column(name="chatRoom")
-	private Long chatRoom;
+	@Column(name="orderId")
+	private Long orderId;
 	
-	@Column(name="username")
-	private String username;
+	@Column(name="pile")
+	private Long pile;
 	
-	@Column(name="chatWith")
-	private String chatWith;
+	@Column(name="front")
+	private String front;
 	
-	@Column(name="postedOn")
-	private Date postedOn;
+	@Column(name="back")
+	private String back;
 	
-	@Column(name="message")
-	private String message;
-	
-	@Column(name="cpu")
-	private boolean cpu;
-	
-	protected ChatMessage() {
+	protected Card() {
 	}
 	
-	public ChatMessage(Long chatRoom, String username, String chatWith, Date postedOn, String message, boolean cpu) {
-		this.chatRoom = chatRoom;
-		this.username = username;
-		this.chatWith = chatWith;
-		this.postedOn = postedOn;
-		this.message = message;
-		this.cpu = cpu;
+	public Card(Long pile, Long orderId, String front, String back) {
+		this.pile = pile;
+		this.orderId = orderId;
+		this.front = front;
+		this.back = back;
 	}
 	
 	public Long getId() {
 		return this.id;
 	}
 	
-	public Long getChatRoom() {
-		return this.chatRoom;
+	public Long getOrderId() {
+		return this.orderId;
 	}
 	
-	public String getUsername() {
-		return this.username;
+	public Long getPile() {
+		return this.pile;
 	}
 	
-	public String getChatWith() {
-		return this.chatWith;
+	public String getFront() {
+		return this.front;
 	}
 	
-	public Date getPostedOn() {
-		return this.postedOn;
-	}
-	
-	public String getMessage() {
-		return this.message;
-	}
-	
-	public boolean getCpu() {
-		return this.cpu;
+	public String getBack() {
+		return this.back;
 	}
 	
 	public void setId(Long id) {
 		this.id = id;
 	}
 	
-	public void setChatRoom(Long chatRoom) {
-		this.chatRoom = chatRoom;
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
 	}
 	
-	public void setUsername(String username) {
-		this.username = username;
+	public void setPile(Long pile) {
+		this.pile = pile;
 	}
 	
-	public void setChatWith(String chatWith) {
-		this.chatWith = chatWith;
+	public void setFront(String front) {
+		this.front = front;
 	}
 	
-	public void setPostedOn(Date postedOn) {
-		this.postedOn = postedOn;
-	}
-	
-	public void setMessage(String message) {
-		this.message = message;
-	}
-	
-	public void setCpu(boolean cpu) {
-		this.cpu = cpu;
+	public void setBack(String back) {
+		this.back = back;
 	}
 	
 }

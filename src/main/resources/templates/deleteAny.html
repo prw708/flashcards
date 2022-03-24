@@ -4,11 +4,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="_csrf_header" th:attr="content=${_csrf.headerName}">
-<meta name="_csrf" th:attr="content=${_csrf.token}">
 <meta name="recaptchaSiteKey" th:attr="content=${recaptchaSiteKey}">
 
-<title>View - Flash Cards</title>
+<title>Delete Any - Flash Cards</title>
 
 <script
       id="recaptchaAPI"
@@ -20,6 +18,7 @@
 <link href="/css/main.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
 
+<script type="text/javascript" src="/js/formHandlers.js"></script>
 <script type="text/javascript" src="/js/utils.js"></script>
 
 </head>
@@ -31,19 +30,32 @@
 	
 		<div class="position-relative container-fluid px-0">
 			<header class="row p-4 g-0">
-				<h1 class="display-3">View Flash Cards</h1>
+				<h1 class="display-3">Delete Flash Cards</h1>
 			</header>
 			<noscript>
 				<div class="alert alert-danger px-4 mb-0">Please enable JavaScript to load all elements.</div>
 			</noscript>
 			<div 
-			  class="alert alert-danger px-4 mb-0"
-			  th:if="${pileDoesNotExistError}"
-			>These flash cards do not exist.</div>
+			  class="alert alert-success px-4 mb-0"
+			  th:if="${successMessage}"
+			  th:text="${successMessage}"
+			></div>
 			<div 
 			  class="alert alert-danger px-4 mb-0"
-			  th:if="${notCreatorError}"
-			>You do not have permission to view these flash cards.</div>
+			  th:if="${notLoggedInError}"
+			>You are not logged in.</div>
+			<div 
+			  class="alert alert-danger px-4 mb-0"
+			  th:if="${errors}"
+			>There are errors in this form.</div>
+			<div 
+			  class="alert alert-danger px-4 mb-0"
+			  th:if="${recaptchaError}"
+			>Invalid recaptcha.</div>
+			<div 
+			  class="alert alert-danger px-4 mb-0"
+			  th:if="${notAdminError}"
+			>You do not have permission to view this page.</div>
 		</div>
 		
 		<div class="row g-0">
@@ -83,7 +95,7 @@
 			        </a>
 			      </li>
 			      <li class="nav-item" th:if="${admin}">
-			        <a href="/delete/any" th:class="'nav-link link-dark'">
+			        <a href="/delete/any" th:class="'nav-link active'">
 			          Delete Any Cards
 			        </a>
 			      </li>
@@ -99,16 +111,53 @@
 			      </li>
 			    </ul>
 			</div>
-			<div class="col-sm-7 col-md-8 col-lg-9 p-4 position-relative">
-				<div 
-					class="row g-0" 
-					id="container"
-					th:attr="data-loggedInAs=${loggedInAs},data-pileId=${pileId},data-viewOnly=true,data-pileDoesNotExist=${pileDoesNotExistError},data-notCreator=${notCreatorError}"
-				></div>
-				<script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
-				<script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
-  				<script type="text/javascript" src="/js/rating.js"></script>
-				<script type="text/javascript" src="/js/cards.js"></script>
+			<div th:if="${admin}" class="col-sm-7 col-md-8 col-lg-9 p-4">
+				<span class="fs-2">All Flash Cards</span>
+				<div class="table-responsive-md">
+					<table class="table align-middle my-4">
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>Last Updated</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="pile : ${piles}">
+								<td>
+									<a class="me-2" th:href="@{'/view/' + ${pile.id}}" th:text="${pile.title}"></a>
+								</td>
+								<td th:text="${#dates.format(pile.lastUpdated, 'yyyy/MM/dd')}"></td>
+								<td>
+									<form 
+										method="POST" 
+										th:attr="id=${pile.id}"
+										th:action="@{/delete/any}"
+										class="d-inline m-0 p-0"
+									>
+							        	<input type="hidden" name="recaptcha">
+							        	<input type="hidden" name="pileId" th:value="${pile.id}">
+										<button type="submit" 
+											class="btn btn-sm btn-danger me-2"
+											onclick="deleteHandler(event)"
+											>Delete</button>
+									</form>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+				<ul th:if="${totalPages > 0}" class="pagination justify-content-center mb-0">
+					<li class="page-item" th:classappend="${previous + 1 <= 1 && currentPage == previous} ? 'disabled' : ''">
+						<a class="page-link" th:href="@{'?page=' + ${previous + 1}}" th:text="Previous"></a>
+					</li>
+					<li th:each="i: ${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${currentPage + 1 == i} ? 'disabled' : ''">
+						<a class="page-link" th:href="@{'?page=' + ${i}}" th:text="${i}"></a>
+					</li>
+					<li class="page-item" th:classappend="${next + 1 > totalPages} ? 'disabled' : ''">
+						<a class="page-link" th:href="@{'?page=' + ${next + 1}}" th:text="Next"></a>
+					</li>
+				</ul>
 			</div>
 		</div>
 		

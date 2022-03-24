@@ -1,4 +1,4 @@
-package com.penguinwebstudio.chat;
+package com.penguinwebstudio.flashcards;
 
 import java.util.Date;
 

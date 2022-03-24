@@ -1,2 +1,2 @@
-# Chat
-A chat application made using Java Spring and React.
+# Flash Cards 
+A flash cards application made using Java, Spring Boot, and React.

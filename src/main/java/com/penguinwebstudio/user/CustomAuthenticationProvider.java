@@ -14,16 +14,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
-import com.penguinwebstudio.conversation.ConversationService;
-
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
 	@Autowired
 	UserService userService;
-	
-	@Autowired
-	ConversationService conversationService;
 	
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -39,9 +34,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 				if (user.isAdmin()) {
 					grantedAuths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
 				}
-				conversationService.addUser(username);
-				conversationService.updateLastAction(username, "AVAILABLE");
-				conversationService.deleteUserConversations(username);
 				return new UsernamePasswordAuthenticationToken(username, password, grantedAuths);
 			} else {
 				throw new BadCredentialsException("Invalid username or password.");

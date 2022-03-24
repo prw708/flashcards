@@ -1,4 +1,4 @@
-package com.penguinwebstudio.chat;
+package com.penguinwebstudio.flashcards;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -7,7 +7,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-import com.penguinwebstudio.conversation.ConversationController;
+import com.penguinwebstudio.cards.CardsController;
 import com.penguinwebstudio.logger.LogService;
 import com.penguinwebstudio.user.UserController;
 
@@ -15,14 +15,14 @@ import com.penguinwebstudio.user.UserController;
 @ComponentScan(basePackageClasses=UserController.class)
 @ComponentScan(basePackageClasses=WebSecurityConfig.class)
 @ComponentScan(basePackageClasses=LogService.class)
-@ComponentScan(basePackageClasses=ConversationController.class)
-@EntityScan("com.penguinwebstudio.conversation")
-@EnableJpaRepositories("com.penguinwebstudio.conversation")
-public class ChatApplication {
+@ComponentScan(basePackageClasses=CardsController.class)
+@EntityScan("com.penguinwebstudio.cards")
+@EnableJpaRepositories("com.penguinwebstudio.cards")
+public class FlashCardsApplication {
 
 	public static void main(String[] args) {
-        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ChatApplication.class.getPackage().getName());
-		SpringApplication.run(ChatApplication.class, args);
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(FlashCardsApplication.class.getPackage().getName());
+		SpringApplication.run(FlashCardsApplication.class, args);
 	}
 
 }

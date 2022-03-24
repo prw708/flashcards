@@ -4,15 +4,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Home - Chat Application</title>
+<meta name="_csrf_header" th:attr="content=${_csrf.headerName}">
+<meta name="_csrf" th:attr="content=${_csrf.token}">
+<meta name="recaptchaSiteKey" th:attr="content=${recaptchaSiteKey}">
+
+<title>Home - Flash Cards</title>
+
+<script
+      id="recaptchaAPI"
+      type="text/javascript"
+      th:src=@{'https://www.google.com/recaptcha/api.js'(render=${recaptchaSiteKey})}>
+</script>
 
 <link rel="icon" type="image/png" href="/images/favicon.png" />
 <link href="/css/main.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
 
-<script type="text/javascript" src="/webjars/sockjs-client/sockjs.min.js"></script>
-<script type="text/javascript" src="/webjars/stomp-websocket/stomp.min.js"></script>
-<script type="text/javascript" src="/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
 <script type="text/javascript" src="/js/utils.js"></script>
 
 </head>
@@ -69,13 +78,38 @@
 			    <ul class="nav nav-pills flex-column mb-4">
 			      <li class="nav-item">
 			        <a href="/" th:class="'nav-link active'">
-			          Who's Online
+			          View Public Cards
+			        </a>
+			      </li>
+			      <li class="nav-item">
+			        <a href="/create" th:class="'nav-link link-dark'">
+			          Create Cards
+			        </a>
+			      </li>
+			      <li class="nav-item">
+			        <a href="/my" th:class="'nav-link link-dark'">
+			          Edit Cards
+			        </a>
+			      </li>
+			      <li class="nav-item">
+			        <a href="/my" th:class="'nav-link link-dark'">
+			          Delete Cards
 			        </a>
 			      </li>
 			     </ul>
 			     <span class="link-dark fs-4">Account</span>
 			     <hr class="link-dark">
 			     <ul class="nav nav-pills flex-column mb-0">
+			      <li class="nav-item" th:if="${loggedInAs}">
+			        <a href="/my" th:class="'nav-link link-dark'">
+			          View My Cards
+			        </a>
+			      </li>
+			      <li class="nav-item" th:if="${admin}">
+			        <a href="/delete/any" th:class="'nav-link link-dark'">
+			          Delete Any Cards
+			        </a>
+			      </li>
 			      <li>
 			        <form method="POST" th:action="@{/logout}" th:if="${loggedInAs}">
 						<button type="submit" 
@@ -90,13 +124,98 @@
 			</div>
 			<div class="col-sm-7 col-md-8 col-lg-9 p-4">				
 	    		<div class="row g-0 mb-4">
-					<span class="fs-2">Logged In Users</span>
+					<span class="fs-2">Public Flash Cards</span>
 	    		</div>
-	    		<div class="row g-0" id="usersContainer" th:attr="data-loggedInAs=${loggedInAs}"></div>
-				<script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
-				<script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
-				<script type="text/javascript" src="/js/users.js"></script>
-			</div>
+	    		<div class="row g-0 mb-4">
+		    		<form 
+						method="GET" 
+						th:action="@{/}"
+						class="m-0 p-0"
+					>
+						<div class="input-group mb-4">
+							<input 
+								type="text" 
+								class="form-control"
+								name="search"
+								id="search"
+								autoComplete="off"
+								maxLength="100"
+								th:value="${search}"
+							/>
+							<button type="submit" 
+								class="btn btn-secondary"
+							>Search</button>
+						</div>
+					</form>
+					<div className="d-flex flex-row align-items-center mb-0">
+						<small className="m-0 me-2 me-md-4">Order By</small>
+						<a 
+							th:href="${orderBy == 'lastUpdated'} ? 
+								('?sort=lastUpdated,' + ${newDirection} + '&page=' + ${currentPage + 1} + '&search=' + ${search}) :
+								('?sort=lastUpdated,desc' + '&page=' + ${currentPage + 1} + '&search=' + ${search})"
+							class="btn btn-link btn-sm link-dark m-0 p-0 ms-2 ms-md-4"
+						>Last Updated</a>
+						<a 
+							th:href="${orderBy == 'title'} ? 
+								('?sort=title,' + ${newDirection} + '&page=' + ${currentPage + 1} + '&search=' + ${search}) :
+								('?sort=title,desc' + '&page=' + ${currentPage + 1} + '&search=' + ${search})"
+							class="btn btn-link btn-sm link-dark m-0 p-0 ms-2 ms-md-4"
+						>Alphabetical</a>
+						<a 
+							th:href="${orderBy == 'rating'} ? 
+								('?sort=rating,' + ${newDirection} + '&page=' + ${currentPage + 1} + '&search=' + ${search}) :
+								('?sort=rating,desc' + '&page=' + ${currentPage + 1} + '&search=' + ${search})"
+							class="btn btn-link btn-sm link-dark m-0 p-0 ms-2 ms-md-4"
+						>Rating</a>
+					</div>
+	    		</div>
+	    		<p th:if="${#lists.isEmpty(piles)}" class="mb-4">No flash cards to show.</p>
+	    		<div th:unless="${#lists.isEmpty(piles)}" class="border-top mb-4">
+	    			<div th:each="pile : ${piles}" class="p-3 border-bottom">
+	    				<a 
+	    					class="btn btn-secondary float-end ms-2" 
+	    					th:href="@{'/view/' + ${pile.id}}"
+	    				>View</a>
+	    				<a 
+	    					th:if="${loggedInAs == pile.creator}"
+	    					class="btn btn-secondary float-end ms-2" 
+	    					th:href="@{'/edit/' + ${pile.id}}"
+	    				>Edit</a>
+	    				<div class="mb-2">
+	    					<span class="fs-5" th:text="${pile.title}"></span>
+	    				</div>
+	    				<div class="rating mb-2" th:attr="data-pileId=${pile.id},data-loggedInAs=${loggedInAs}"></div>
+	    				<ul class="list-unstyled mb-0">
+	    					<li><small th:text="'Creator: ' + ${pile.creator}"></small></li>
+	    					<li><small th:text="'Last Updated: ' + ${#dates.format(pile.lastUpdated, 'dd/MM/yyyy HH:mm')}"></small></li>
+	    					<li><small th:text="'Card Count: ' + ${pile.count}"></small></li>
+	    				</ul>
+	    			</div>
+	    		</div>
+			<ul th:if="${totalPages > 0}" class="pagination justify-content-center mb-0">
+				<li class="page-item" th:classappend="${previous + 1 <= 1 && currentPage == previous} ? 'disabled' : ''">
+					<a 
+						class="page-link" 
+						th:href="@{'?sort=' + ${orderBy} + ',' + ${direction} + '&page=' + ${previous + 1} + '&search=' + ${search}}" 
+						th:text="Previous"
+					></a>
+				</li>
+				<li th:each="i: ${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${currentPage + 1 == i} ? 'disabled' : ''">
+					<a 
+						class="page-link" 
+						th:href="@{'?sort=' + ${orderBy} + ',' + ${direction} + '&page=' + ${i} + '&search=' + ${search}}" 
+						th:text="${i}"
+					></a>
+				</li>
+				<li class="page-item" th:classappend="${next + 1 > totalPages} ? 'disabled' : ''">
+					<a 
+						class="page-link" 
+						th:href="@{'?sort=' + ${orderBy} + ',' + ${direction} + '&page=' + ${next + 1} + '&search=' + ${search}}" 
+						th:text="Next"
+					></a>
+				</li>
+			</ul>
+			<script type="text/javascript" src="/js/rating.js"></script>
 		</div>
 		
 		<div th:fragment="baseFooter">

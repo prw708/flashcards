@@ -1,4 +1,4 @@
-package com.penguinwebstudio.chat;
+package com.penguinwebstudio.flashcards;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration;

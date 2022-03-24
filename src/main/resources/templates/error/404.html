@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>404 - Chat Application</title>
+<title>404 - Flash Cards</title>
 
 <link rel="icon" type="image/png" href="/images/favicon.png" />
 <link href="/css/main.css" rel="stylesheet">
@@ -45,13 +45,38 @@
 				<ul class="nav nav-pills flex-column mb-4">
 			      <li class="nav-item">
 			        <a href="/" class="nav-link link-dark">
-			          Who's Online
+			          View Public Cards
+			        </a>
+			      </li>
+			      <li class="nav-item">
+			        <a href="/create" th:class="'nav-link link-dark'">
+			          Create Cards
+			        </a>
+			      </li>
+			      <li class="nav-item">
+			        <a href="/my" th:class="'nav-link link-dark'">
+			          Edit Cards
+			        </a>
+			      </li>
+			      <li class="nav-item">
+			        <a href="/my" th:class="'nav-link link-dark'">
+			          Delete Cards
 			        </a>
 			      </li>
 			     </ul>
 			     <span class="link-dark fs-4">Account</span>
 			     <hr class="link-dark">
 			     <ul class="nav nav-pills flex-column mb-0">
+			      <li class="nav-item" th:if="${loggedInAs}">
+			        <a href="/my" th:class="'nav-link link-dark'">
+			          View My Cards
+			        </a>
+			      </li>
+			      <li class="nav-item" th:if="${admin}">
+			        <a href="/delete/any" th:class="'nav-link link-dark'">
+			          Delete Any Cards
+			        </a>
+			      </li>
 			      <li class="nav-item">
 			        <form method="POST" th:action="@{/logout}" th:if="${loggedInAs}">
 						<button type="submit" 

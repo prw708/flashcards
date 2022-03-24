@@ -4,18 +4,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Error - Flash Cards</title>
+<meta name="_csrf_header" th:attr="content=${_csrf.headerName}">
+<meta name="_csrf" th:attr="content=${_csrf.token}">
+<meta name="recaptchaSiteKey" th:attr="content=${recaptchaSiteKey}">
+
+<title>Edit - Flash Cards</title>
+
+<script
+      id="recaptchaAPI"
+      type="text/javascript"
+      th:src=@{'https://www.google.com/recaptcha/api.js'(render=${recaptchaSiteKey})}>
+</script>
 
 <link rel="icon" type="image/png" href="/images/favicon.png" />
 <link href="/css/main.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
 
-<script 
-  id="recaptchaAPI"
-  type="text/javascript"
-  src="https://www.google.com/recaptcha/api.js"
-></script>
-<script type="text/javascript" src="/js/formHandlers.js"></script>
+<script type="text/javascript" src="/js/utils.js"></script>
 
 </head>
 
@@ -26,14 +31,19 @@
 	
 		<div class="position-relative container-fluid px-0">
 			<header class="row p-4 g-0">
-				<h1 class="display-3">Error</h1>
+				<h1 class="display-3">Edit Flash Cards</h1>
 			</header>
 			<noscript>
 				<div class="alert alert-danger px-4 mb-0">Please enable JavaScript to load all elements.</div>
 			</noscript>
 			<div 
 			  class="alert alert-danger px-4 mb-0"
-			>500 Internal Server Error.</div>
+			  th:if="${pileDoesNotExistError}"
+			>These flash cards do not exist.</div>
+			<div 
+			  class="alert alert-danger px-4 mb-0"
+			  th:if="${notCreatorError}"
+			>You do not have permission to edit these flash cards.</div>
 		</div>
 		
 		<div class="row g-0">
@@ -54,7 +64,7 @@
 			        </a>
 			      </li>
 			      <li class="nav-item">
-			        <a href="/my" th:class="'nav-link link-dark'">
+			        <a href="/my" th:class="'nav-link active'">
 			          Edit Cards
 			        </a>
 			      </li>
@@ -90,9 +100,14 @@
 			    </ul>
 			</div>
 			<div class="col-sm-7 col-md-8 col-lg-9 p-4">
-				<div class="fs-2 mb-4">500</div>
-				<p class="mb-4">An error occurred. Please try again later.</p>
-				<a href="/">Return</a>
+				<div 
+					class="row g-0" 
+					id="container"
+					th:attr="data-pileId=${pileId},data-pileDoesNotExist=${pileDoesNotExistError},data-notCreator=${notCreatorError}"
+				></div>
+				<script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+				<script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+				<script type="text/javascript" src="/js/cards.js"></script>
 			</div>
 		</div>
 		

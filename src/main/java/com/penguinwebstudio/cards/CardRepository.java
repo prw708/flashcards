@@ -1,15 +1,15 @@
-package com.penguinwebstudio.conversation;
+package com.penguinwebstudio.cards;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
 
-public interface ChatMessageRepository extends CrudRepository<ChatMessage, Long> {
+public interface CardRepository extends CrudRepository<Card, Long> {
 
-	public Optional<ChatMessage> findById(Long id);
+	public Optional<Card> findById(Long id);
 	
-	public List<ChatMessage> findByChatRoomOrderByPostedOnAsc(Long chatRoom);
+	public List<Card> findByPileOrderByOrderIdAsc(Long pile);
 	
 	public void deleteById(Long id);
 	

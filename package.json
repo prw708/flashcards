@@ -1,0 +1,24 @@
+{
+  "name": "flashcards",
+  "version": "1.0.0",
+  "description": "A flash cards application made using Java, Spring Boot, and React.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prw708/flashcards.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/prw708/flashcards/issues"
+  },
+  "homepage": "https://github.com/prw708/flashcards#readme",
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-react-app": "^3.1.2"
+  }
+}

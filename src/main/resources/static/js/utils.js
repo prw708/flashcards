@@ -1,88 +1,67 @@
-function setUserStatus(username, status) {
-	if (!username || !status) {
-		return Promise.resolve(false);
-	}
+function load(path, data) {
 	return new Promise(function(resolve, reject) {
 		var httpRequest = new XMLHttpRequest();
-		var path = "/set?username=" + username + "&status=" + status;
-		httpRequest.open("GET", path, true);
-		httpRequest.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-		httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		httpRequest.send();
+		var csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+		var csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+		var recaptchaSiteKey = document.querySelector('meta[name="recaptchaSiteKey"]').getAttribute('content');
+		grecaptcha.ready(function() {
+        	grecaptcha.execute(recaptchaSiteKey, { action: 'load' })
+        	.then(function(recaptchaToken) {
+	          	data['recaptcha'] = recaptchaToken;
+	          	httpRequest.open('POST', path, true);
+	          	httpRequest.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+	          	httpRequest.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+				httpRequest.setRequestHeader(csrfHeader, csrfToken);
+	          	httpRequest.send(JSON.stringify(data));
+        	}.bind(this));
+      	}.bind(this));
 		httpRequest.onreadystatechange = function() {
 			if (httpRequest.readyState === XMLHttpRequest.DONE) {
 				if (httpRequest.status === 200) {
-					resolve(true);
+					try {
+						var json = JSON.parse(httpRequest.responseText);
+					} catch (e) {
+						resolve(false);
+					}
+					resolve(json);
 				} else {
 					reject(httpRequest.status);
 				}
 			}
-		};
-	});
-}
-	
-function getAllUsers() {
-	return new Promise(function(resolve, reject) {
-		var httpRequest = new XMLHttpRequest();
-		var path = "/all";
-		httpRequest.open("GET", path, true);
-		httpRequest.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-		httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		httpRequest.send();
-		httpRequest.onreadystatechange = function() {
-			if (httpRequest.readyState === XMLHttpRequest.DONE) {
-				if (httpRequest.status === 200) {
-					resolve(JSON.parse(httpRequest.responseText));
-				} else {
-					reject(httpRequest.status);
-				}
-			}
-		};
-	});
+		}.bind(this);
+	}.bind(this));
 }
 
-function getUser(username) {
-	if (!username) {
-		return Promise.resolve(false);
-	}
+function save(path, data) {
 	return new Promise(function(resolve, reject) {
 		var httpRequest = new XMLHttpRequest();
-		var path = "/get?username=" + username;
-		httpRequest.open("GET", path, true);
-		httpRequest.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-		httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		httpRequest.send();
+		var csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+		var csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+		var recaptchaSiteKey = document.querySelector('meta[name="recaptchaSiteKey"]').getAttribute('content');
+		grecaptcha.ready(function() {
+        	grecaptcha.execute(recaptchaSiteKey, { action: 'save' })
+        	.then(function(recaptchaToken) {
+	          	data['recaptcha'] = recaptchaToken;
+	          	httpRequest.open('POST', path, true);
+	          	httpRequest.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+	          	httpRequest.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+				httpRequest.setRequestHeader(csrfHeader, csrfToken);
+	          	httpRequest.send(JSON.stringify(data));
+        	}.bind(this));
+      	}.bind(this));
 		httpRequest.onreadystatechange = function() {
 			if (httpRequest.readyState === XMLHttpRequest.DONE) {
 				if (httpRequest.status === 200) {
-					resolve(JSON.parse(httpRequest.responseText));
+					try {
+						var success = JSON.parse(httpRequest.responseText);
+					} catch (e) {
+						resolve({status: false});
+					}
+					resolve(success);
 				} else {
 					reject(httpRequest.status);
 				}
 			}
-		};
-	});
-}
-
-function resetStatus(user1, user2) {
-	if (!user1 || !user2) {
-		return Promise.resolve(false);
-	}
-	return new Promise(function(resolve, reject) {
-		var httpRequest = new XMLHttpRequest();
-		var path = "/reset?user1=" + user1 + "&user2=" + user2;
-		httpRequest.open("GET", path, true);
-		httpRequest.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-		httpRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-		httpRequest.send();
-		httpRequest.onreadystatechange = function() {
-			if (httpRequest.readyState === XMLHttpRequest.DONE) {
-				if (httpRequest.status === 200) {
-					resolve(JSON.parse(httpRequest.responseText));
-				} else {
-					reject(httpRequest.status);
-				}
-			}
-		};
-	});
+		}.bind(this);
+	}.bind(this));
 }

@@ -1,190 +1,125 @@
-package com.penguinwebstudio.conversation;
+package com.penguinwebstudio.cards;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ConversationService {
-
-	LoggedInUserRepository loggedInUserRepository;
-	ChatRoomRepository chatRoomRepository;
-	ChatMessageRepository chatMessageRepository;
+public class CardsService {
+	
+	PileRepository pileRepository;
+	CardRepository cardRepository;
+	RaterRepository raterRepository;
 	
 	@Autowired
-	public ConversationService(
-			LoggedInUserRepository loggedInUserRepository, 
-			ChatRoomRepository chatRoomRepository,
-			ChatMessageRepository chatMessageRepository
+	public CardsService(
+			PileRepository pileRepository, 
+			CardRepository cardRepository,
+			RaterRepository raterRepository
 	) {
-		this.loggedInUserRepository = loggedInUserRepository;
-		this.chatRoomRepository = chatRoomRepository;
-		this.chatMessageRepository = chatMessageRepository;
+		this.pileRepository = pileRepository;
+		this.cardRepository = cardRepository;
+		this.raterRepository = raterRepository;
 	}
 	
-	public List<LoggedInUser> getAllUsersByUsername() {
-		return loggedInUserRepository.findAllByOrderByUsername();
-	}
-	
-	public List<LoggedInUser> getAllUsersByLastAction() {
-		return loggedInUserRepository.findAllByOrderByLastAction();
-	}
-	
-	public LoggedInUser getUser(String username) {
-		LoggedInUser loggedInUser = loggedInUserRepository.findByUsername(username);
-		return loggedInUser;
-	}
-	
-	public void addUser(String username) {
-		LoggedInUser loggedInUser = loggedInUserRepository.findByUsername(username);
-		if (loggedInUser != null) {
-			loggedInUser.setLastAction(new Date());
-			loggedInUserRepository.save(loggedInUser);
+	public Long createPile(Pile pile, List<Card> cards) {
+		Pile existingPile = null;
+		if (pile.getId() != null) {
+			existingPile = pileRepository.findById(pile.getId()).orElse(null);
+		}
+		if (existingPile != null) {
+			existingPile.setTitle(pile.getTitle());
+			existingPile.setCreator(pile.getCreator());
+			existingPile.setMakePublic(pile.getMakePublic());
+			existingPile.setLastUpdated(pile.getLastUpdated());
+			existingPile.setCount((long) cards.size());
+			pileRepository.save(existingPile);
+			List<Card> existingCards = cardRepository.findByPileOrderByOrderIdAsc(existingPile.getId());
+			for (Card c : existingCards) {
+				cardRepository.delete(c);
+			}
+			Long orderId = (long) 1;
+			for (Card c : cards) {
+				Card card = new Card(existingPile.getId(), orderId, c.getFront(), c.getBack());
+				cardRepository.save(card);
+				orderId++;
+			}
+			return existingPile.getId();
 		} else {
-			LoggedInUser newUser = new LoggedInUser(username);
-			loggedInUserRepository.save(newUser);
+			pile.setCount((long) cards.size());
+			pileRepository.save(pile);
+			Long orderId = (long) 1;
+			for (Card c : cards) {
+				Card card = new Card(pile.getId(), orderId, c.getFront(), c.getBack());
+				cardRepository.save(card);
+				orderId++;
+			}
+			return pile.getId();
 		}
 	}
 	
-	public void deleteUser(String username) {
-		LoggedInUser loggedInUser = loggedInUserRepository.findByUsername(username);
-		if (loggedInUser != null) {
-			loggedInUserRepository.deleteById(loggedInUser.getId());
+	public Page<Pile> getPilesByCreator(String creator, Pageable pageable) {
+		return pileRepository.findByCreatorOrderByLastUpdatedDescCreatorAsc(creator, pageable);
+	}
+	
+	public CreateForm loadPile(Long pileId) {
+		List<Card> cards = cardRepository.findByPileOrderByOrderIdAsc(pileId);
+		Pile pile = pileRepository.findById(pileId).orElse(null);
+		CreateForm data = new CreateForm();
+		data.setTitle(pile.getTitle());
+		data.setMakePublic(pile.getMakePublic());
+		data.setCards(cards);
+		data.setRecaptcha(null);
+		return data;
+	}
+	
+	public Pile getPileById(Long pileId) {
+		return pileRepository.findById(pileId).orElse(null);
+	}
+	
+	public Page<Pile> getPublicPiles(String search, Pageable pageable) {
+		if (search != null && !search.isEmpty()) {
+			return pileRepository.findByMakePublicAndTitleContainingIgnoreCase(true, search, pageable);
+		}
+		return pileRepository.findByMakePublic(true, pageable);
+	}
+	
+	public void deletePile(Long pileId) {
+		pileRepository.deleteById(pileId);
+		List<Rater> ratings = raterRepository.findByPileId(pileId);
+		for (Rater r : ratings) {
+			raterRepository.deleteById(r.getId());
 		}
 	}
 	
-	public void updateLastAction(String username, String status) {
-		LoggedInUser loggedInUser = loggedInUserRepository.findByUsername(username);
-		if (loggedInUser == null) {
-			return;
-		}
-		loggedInUser.setLastAction(new Date());
-		loggedInUser.setStatus(status);
-		loggedInUserRepository.save(loggedInUser);
+	public Long getPileCountByCreator(String creator) {
+		return pileRepository.countByCreator(creator);
 	}
 	
-	public ResetStatusMessage resetStatus(String user1, String user2) {
-		List<ChatRoom> chatRooms = chatRoomRepository.findByActive(true);
-		String user1Status = "AVAILABLE";
-		String user2Status = "AVAILABLE";
-		for (ChatRoom c : chatRooms) {
-			if (c.getUser1().equals(user1) || c.getUser2().equals(user1)) {
-				user1Status = "BUSY";
-				break;
-			}
+	public Pile setRating(RatingForm ratingForm) {
+		if (raterRepository.findByRaterAndPileId(ratingForm.getRater(), ratingForm.getPileId()) != null) {
+			return null;
+		} else {
+			Rater r = new Rater(ratingForm.getPileId(), ratingForm.getRater());
+			raterRepository.save(r);
+			Pile p = pileRepository.findById(ratingForm.getPileId()).orElse(null);
+			double avgN1 = (p.getRating() * p.getRatingsCompleted() + ratingForm.getRating()) / (p.getRatingsCompleted() + 1);
+			p.setRating(avgN1);
+			p.setRatingsCompleted(p.getRatingsCompleted() + 1);
+			pileRepository.save(p);
+			return p;
 		}
-		for (ChatRoom c : chatRooms) {
-			if (c.getUser1().equals(user2) || c.getUser2().equals(user2)) {
-				user2Status = "BUSY";
-				break;
-			}
-		}
-		return new ResetStatusMessage(user1, user1Status, user2, user2Status);
 	}
 	
-	public Long createChatRoom(String loggedInAs, String user1, String user2) {
-		ChatRoom chatRoom = null;
-		if (chatRoomRepository.findByUser1(user1) != null) {
-			return (long) -1;
-		}
-		if (chatRoomRepository.findByUser2(user1).size() != 0) {
-			List<ChatRoom> user2List = chatRoomRepository.findByUser2(user1);
-			for (ChatRoom c : user2List) {
-				if (c.getActive()) {
-					return (long) -1;
-				}
-			}
-		}
-		if (chatRoomRepository.findByUser1(user1) == null && 
-			chatRoomRepository.findByUser2(user2).size() == 0 &&
-			chatRoomRepository.findByUser1(user2) == null
-		) {
-			chatRoom = new ChatRoom(user1, user2);
-			chatRoomRepository.save(chatRoom);
-		} else if (loggedInUserRepository.findByUsername(user2).getStatus().equals("BUSY") && 
-			chatRoomRepository.findByUser2(user1).size() != 0
-		) {
-			List<ChatRoom> user2List = chatRoomRepository.findByUser2(user1);
-			for (ChatRoom c : user2List) {
-				if (c.getUser2().equals(user1) && c.getUser1().equals(user2)) {
-					chatRoom = c;
-					chatRoom.setActive(true);
-					chatRoomRepository.save(chatRoom);
-					break;
-				}
-			}
-		} else if (!loggedInUserRepository.findByUsername(user2).getStatus().equals("BUSY") && 
-			chatRoomRepository.findByUser2(user2).size() != 0 &&
-			chatRoomRepository.findByUser1(user2) == null
-		) {
-			List<ChatRoom> user2List = chatRoomRepository.findByUser2(user1);
-			if (user2List.size() == 0) {
-				chatRoom = new ChatRoom(user1, user2);
-				chatRoomRepository.save(chatRoom);
-			} else {
-				for (ChatRoom u : user2List) {
-					if (u.getUser2().equals(user2)) {
-						chatRoom = new ChatRoom(user1, user2);
-						chatRoomRepository.save(chatRoom);
-						break;
-					}
-				}
-			}
-		}
-		if (chatRoom == null) {
-			return (long) -1;
-		}
-		return chatRoom.getId();
-	}
-	
-	public boolean deleteChatRoomConversation(Long chatRoomId) {
-		try {
-			List<ChatMessage> conversation = chatMessageRepository.findByChatRoomOrderByPostedOnAsc(chatRoomId);
-			for (ChatMessage c : conversation) {
-				chatMessageRepository.deleteById(c.getId());
-			}
-			chatRoomRepository.deleteById(chatRoomId);
-		} catch (Exception e) {
-			return false;
-		}
-		return true;
-	}
-	
-	public boolean deleteUserConversations(String username) {
-		try {
-			ChatRoom chatRoom = chatRoomRepository.findByUser1(username);
-			if (chatRoom != null) {
-				List<ChatMessage> conversation = chatMessageRepository.findByChatRoomOrderByPostedOnAsc(chatRoom.getId());
-				for (ChatMessage c : conversation) {
-					chatMessageRepository.deleteById(c.getId());
-				}
-				chatRoomRepository.deleteById(chatRoom.getId());
-			}
-			List<ChatRoom> chatRooms = chatRoomRepository.findByUser2(username);
-			if (chatRooms != null && chatRooms.size() > 0) {
-				for (ChatRoom c : chatRooms) {
-					List<ChatMessage> conversation = chatMessageRepository.findByChatRoomOrderByPostedOnAsc(c.getId());
-					for (ChatMessage m : conversation) {
-						chatMessageRepository.deleteById(m.getId());
-					}
-					chatRoomRepository.deleteById(c.getId());
-				}
-			}
-		} catch (Exception e) {
-			return false;
-		}
-		return true;
-	}
-	
-	public void addChatMessage(ChatMessage message) {
-		chatMessageRepository.save(message);
-	}
-	
-	public List<ChatMessage> getAllChatRoomMessages(Long chatRoom) {
-		return chatMessageRepository.findByChatRoomOrderByPostedOnAsc(chatRoom);
+	public Page<Pile> getAllPiles(Pageable pageable) {
+		Page<Pile> piles = pileRepository.findAllByOrderByLastUpdatedDescCreatorAsc(pageable);
+		return piles;
 	}
 	
 }

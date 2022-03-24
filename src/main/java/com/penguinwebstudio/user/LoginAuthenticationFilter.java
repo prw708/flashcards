@@ -17,7 +17,6 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 import com.google.gson.Gson;
-import com.penguinwebstudio.conversation.ConversationService;
 import com.penguinwebstudio.utils.HttpRequests;
 import com.penguinwebstudio.utils.RecaptchaResponse;
 

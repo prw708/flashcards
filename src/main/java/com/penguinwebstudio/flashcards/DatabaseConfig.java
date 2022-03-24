@@ -1,4 +1,4 @@
-package com.penguinwebstudio.chat;
+package com.penguinwebstudio.flashcards;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.context.annotation.Bean;
@@ -9,7 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 @Configuration
-@ComponentScan(basePackages = "com.penguinwebstudio.chat")
+@ComponentScan(basePackages = "com.penguinwebstudio.flashcards")
 public class DatabaseConfig {
 
     @Bean
