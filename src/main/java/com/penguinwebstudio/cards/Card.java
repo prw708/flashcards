@@ -19,10 +19,10 @@ public class Card {
 	@Column(name="pile")
 	private Long pile;
 	
-	@Column(name="front")
+	@Column(name="front", length=10000)
 	private String front;
 	
-	@Column(name="back")
+	@Column(name="back", length=10000)
 	private String back;
 	
 	protected Card() {

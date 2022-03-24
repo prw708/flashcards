@@ -166,6 +166,8 @@ class Card extends React.Component {
 		if (this.props.loading !== prevProps.loading) {
 			this.card.current.focus();
 		}
+		this.textInput.current.style.height = "auto";
+		this.textInput.current.style.height = this.textInput.current.scrollHeight + "px";
 	}
 	
 	handleFlipClick(event) {
@@ -185,6 +187,7 @@ class Card extends React.Component {
 	}
 	
 	handleTextChange(event) {
+		this.textInput.current.style.height = this.textInput.current.scrollHeight + "px";
 		this.props.onTextChange(event.target.value);
 	}
 	

@@ -269,6 +269,8 @@ var Card = function (_React$Component4) {
 			if (this.props.loading !== prevProps.loading) {
 				this.card.current.focus();
 			}
+			this.textInput.current.style.height = "auto";
+			this.textInput.current.style.height = this.textInput.current.scrollHeight + "px";
 		}
 	}, {
 		key: "handleFlipClick",
@@ -292,6 +294,7 @@ var Card = function (_React$Component4) {
 	}, {
 		key: "handleTextChange",
 		value: function handleTextChange(event) {
+			this.textInput.current.style.height = this.textInput.current.scrollHeight + "px";
 			this.props.onTextChange(event.target.value);
 		}
 	}, {
