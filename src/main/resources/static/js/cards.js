@@ -264,11 +264,18 @@ var Card = function (_React$Component4) {
 	}
 
 	_createClass(Card, [{
+		key: "componentDidMount",
+		value: function componentDidMount() {
+			window.addEventListener("keydown", this.handleKeyDown, false);
+		}
+	}, {
+		key: "componentWillUnmount",
+		value: function componentWillUnmount() {
+			window.removeEventListener("keydown", this.handleKeyDown);
+		}
+	}, {
 		key: "componentDidUpdate",
 		value: function componentDidUpdate(prevProps) {
-			if (this.props.loading !== prevProps.loading) {
-				this.card.current.focus();
-			}
 			this.textInput.current.style.height = "auto";
 			this.textInput.current.style.height = this.textInput.current.scrollHeight + "px";
 		}
@@ -301,6 +308,9 @@ var Card = function (_React$Component4) {
 	}, {
 		key: "handleKeyDown",
 		value: function handleKeyDown(event) {
+			if (event.target.tagName.toLowerCase() === "input" || event.target.tagName.toLowerCase() === "textarea") {
+				return;
+			}
 			switch (event.code) {
 				case "Space":
 					if (document.activeElement !== this.textInput.current) {
@@ -357,8 +367,6 @@ var Card = function (_React$Component4) {
 					"div",
 					{
 						className: !this.props.loading && this.props.cards.length > 0 ? "card" : "card d-none",
-						tabIndex: "0",
-						onKeyDown: this.handleKeyDown,
 						ref: this.card
 					},
 					React.createElement(

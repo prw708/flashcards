@@ -162,10 +162,15 @@ class Card extends React.Component {
 		this.card = React.createRef();
 	}
 	
+	componentDidMount() {
+		window.addEventListener("keydown", this.handleKeyDown, false);
+	}
+	
+	componentWillUnmount() {
+		window.removeEventListener("keydown", this.handleKeyDown);
+	}
+	
 	componentDidUpdate(prevProps) {
-		if (this.props.loading !== prevProps.loading) {
-			this.card.current.focus();
-		}
 		this.textInput.current.style.height = "auto";
 		this.textInput.current.style.height = this.textInput.current.scrollHeight + "px";
 	}
@@ -193,6 +198,9 @@ class Card extends React.Component {
 	}
 	
 	handleKeyDown(event) {
+		if (event.target.tagName.toLowerCase() === "input" || event.target.tagName.toLowerCase() === "textarea") {
+			return;
+		}
 		switch (event.code) {
 			case "Space":
 				if (document.activeElement !== this.textInput.current) {
@@ -231,8 +239,6 @@ class Card extends React.Component {
 			}
 			<div 
 				className={!this.props.loading && this.props.cards.length > 0 ? "card" : "card d-none"}
-				tabIndex="0" 
-				onKeyDown={this.handleKeyDown}
 				ref={this.card}
 			>
 				<div className="card-header d-flex align-items-center">
