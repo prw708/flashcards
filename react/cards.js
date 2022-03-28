@@ -14,7 +14,6 @@ class SaveButton extends React.Component {
 			>
 				{this.props.saving ? 
 				<span className="spinner-border spinner-border-sm">
-					<span className="visually-hidden">Saving...</span>
 				</span> : 
 				"Save"}
 			</button>
@@ -163,11 +162,11 @@ class Card extends React.Component {
 	}
 	
 	componentDidMount() {
-		window.addEventListener("keydown", this.handleKeyDown, false);
+		document.addEventListener("keydown", this.handleKeyDown, false);
 	}
 	
 	componentWillUnmount() {
-		window.removeEventListener("keydown", this.handleKeyDown);
+		document.removeEventListener("keydown", this.handleKeyDown);
 	}
 	
 	componentDidUpdate(prevProps) {
@@ -201,19 +200,22 @@ class Card extends React.Component {
 		if (event.target.tagName.toLowerCase() === "input" || event.target.tagName.toLowerCase() === "textarea") {
 			return;
 		}
-		switch (event.code) {
-			case "Space":
+		switch (event.key) {
+			case " ":
+			case "Spacebar":
 				if (document.activeElement !== this.textInput.current) {
 					event.preventDefault();
 					this.props.onFlip();
 				}
 				break;
 			case "ArrowRight":
+			case "Right":
 				if (document.activeElement !== this.textInput.current) {
 					this.props.onNext();
 				}
 				break;
 			case "ArrowLeft":
+			case "Left":
 				if (document.activeElement !== this.textInput.current) {
 					this.props.onPrevious();
 				}
@@ -226,7 +228,6 @@ class Card extends React.Component {
 			{this.props.loading && 
 			<div className="text-center mb-4">
 				<div className="spinner-border">
-					<span className="visually-hidden">Loading...</span>
 				</div>
 			</div>
 			}
@@ -270,7 +271,7 @@ class Card extends React.Component {
 							onChange={this.handleTextChange}
 							ref={this.textInput}
 							readOnly={this.props.viewOnly ? true : false}
-							style={{resize: "none"}}
+							style={{resize: "none", overflow: "hidden", backgroundColor: "#fff"}}
 						>
 						</textarea>
 					</form>

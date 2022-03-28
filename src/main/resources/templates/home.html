@@ -13,7 +13,7 @@
 <script
       id="recaptchaAPI"
       type="text/javascript"
-      th:src=@{'https://www.google.com/recaptcha/api.js'(render=${recaptchaSiteKey})}>
+      th:src="@{https://www.google.com/recaptcha/api.js(render=${recaptchaSiteKey})}">
 </script>
 
 <link rel="icon" type="image/png" href="/images/favicon.png" />
@@ -35,7 +35,7 @@
 	        		<div class="row">
 	        			<div class="col-sm-9 p-2 d-flex overflow-hidden text-nowrap">
 	        				<div class="pe-2">
-	        					<a class="navbar-toggler border-0" href="https://penguinwebstudio.herokuapp.com/">
+	        					<a class="navbar-toggler border-0 text-decoration-none" href="https://penguinwebstudio.herokuapp.com/">
 			                		<span class="navbar-arrow-icon"></span>
 			                	</a>
 	        				</div>
@@ -192,30 +192,31 @@
 	    				</ul>
 	    			</div>
 	    		</div>
-			<ul th:if="${totalPages > 0}" class="pagination justify-content-center mb-0">
-				<li class="page-item" th:classappend="${previous + 1 <= 1 && currentPage == previous} ? 'disabled' : ''">
-					<a 
-						class="page-link" 
-						th:href="@{'?sort=' + ${orderBy} + ',' + ${direction} + '&page=' + ${previous + 1} + '&search=' + ${search}}" 
-						th:text="Previous"
-					></a>
-				</li>
-				<li th:each="i: ${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${currentPage + 1 == i} ? 'disabled' : ''">
-					<a 
-						class="page-link" 
-						th:href="@{'?sort=' + ${orderBy} + ',' + ${direction} + '&page=' + ${i} + '&search=' + ${search}}" 
-						th:text="${i}"
-					></a>
-				</li>
-				<li class="page-item" th:classappend="${next + 1 > totalPages} ? 'disabled' : ''">
-					<a 
-						class="page-link" 
-						th:href="@{'?sort=' + ${orderBy} + ',' + ${direction} + '&page=' + ${next + 1} + '&search=' + ${search}}" 
-						th:text="Next"
-					></a>
-				</li>
-			</ul>
-			<script type="text/javascript" src="/js/rating.js"></script>
+				<ul th:if="${totalPages > 0}" class="pagination justify-content-center mb-0">
+					<li class="page-item" th:classappend="${previous + 1 <= 1 && currentPage == previous} ? 'disabled' : ''">
+						<a 
+							class="page-link" 
+							th:href="@{'?sort=' + ${orderBy} + ',' + ${direction} + '&page=' + ${previous + 1} + '&search=' + ${search}}" 
+							th:text="Previous"
+						></a>
+					</li>
+					<li th:each="i: ${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${currentPage + 1 == i} ? 'disabled' : ''">
+						<a 
+							class="page-link" 
+							th:href="@{'?sort=' + ${orderBy} + ',' + ${direction} + '&page=' + ${i} + '&search=' + ${search}}" 
+							th:text="${i}"
+						></a>
+					</li>
+					<li class="page-item" th:classappend="${next + 1 > totalPages} ? 'disabled' : ''">
+						<a 
+							class="page-link" 
+							th:href="@{'?sort=' + ${orderBy} + ',' + ${direction} + '&page=' + ${next + 1} + '&search=' + ${search}}" 
+							th:text="Next"
+						></a>
+					</li>
+				</ul>
+				<script type="text/javascript" src="/js/rating.js"></script>
+			</div>
 		</div>
 		
 		<div th:fragment="baseFooter">

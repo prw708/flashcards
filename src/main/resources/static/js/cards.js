@@ -30,15 +30,7 @@ var SaveButton = function (_React$Component) {
 						onClick: this.props.onSave,
 						disabled: this.props.saving || this.props.viewOnly ? true : false
 					},
-					this.props.saving ? React.createElement(
-						"span",
-						{ className: "spinner-border spinner-border-sm" },
-						React.createElement(
-							"span",
-							{ className: "visually-hidden" },
-							"Saving..."
-						)
-					) : "Save"
+					this.props.saving ? React.createElement("span", { className: "spinner-border spinner-border-sm" }) : "Save"
 				),
 				React.createElement(
 					"div",
@@ -266,12 +258,12 @@ var Card = function (_React$Component4) {
 	_createClass(Card, [{
 		key: "componentDidMount",
 		value: function componentDidMount() {
-			window.addEventListener("keydown", this.handleKeyDown, false);
+			document.addEventListener("keydown", this.handleKeyDown, false);
 		}
 	}, {
 		key: "componentWillUnmount",
 		value: function componentWillUnmount() {
-			window.removeEventListener("keydown", this.handleKeyDown);
+			document.removeEventListener("keydown", this.handleKeyDown);
 		}
 	}, {
 		key: "componentDidUpdate",
@@ -311,19 +303,22 @@ var Card = function (_React$Component4) {
 			if (event.target.tagName.toLowerCase() === "input" || event.target.tagName.toLowerCase() === "textarea") {
 				return;
 			}
-			switch (event.code) {
-				case "Space":
+			switch (event.key) {
+				case " ":
+				case "Spacebar":
 					if (document.activeElement !== this.textInput.current) {
 						event.preventDefault();
 						this.props.onFlip();
 					}
 					break;
 				case "ArrowRight":
+				case "Right":
 					if (document.activeElement !== this.textInput.current) {
 						this.props.onNext();
 					}
 					break;
 				case "ArrowLeft":
+				case "Left":
 					if (document.activeElement !== this.textInput.current) {
 						this.props.onPrevious();
 					}
@@ -339,15 +334,7 @@ var Card = function (_React$Component4) {
 				this.props.loading && React.createElement(
 					"div",
 					{ className: "text-center mb-4" },
-					React.createElement(
-						"div",
-						{ className: "spinner-border" },
-						React.createElement(
-							"span",
-							{ className: "visually-hidden" },
-							"Loading..."
-						)
-					)
+					React.createElement("div", { className: "spinner-border" })
 				),
 				!this.props.loading && this.props.cards.length === 0 && React.createElement(
 					"div",
@@ -413,7 +400,7 @@ var Card = function (_React$Component4) {
 								onChange: this.handleTextChange,
 								ref: this.textInput,
 								readOnly: this.props.viewOnly ? true : false,
-								style: { resize: "none" }
+								style: { resize: "none", overflow: "hidden", backgroundColor: "#fff" }
 							})
 						)
 					)

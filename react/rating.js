@@ -74,7 +74,6 @@ class Stars extends React.Component {
 		if (this.props.loading || this.props.saving) {
 			return <div className="mb-2">
 				<div className="spinner-border">
-					<span className="visually-hidden">Loading...</span>
 				</div>
 			</div>;
 		} else {
@@ -185,13 +184,13 @@ class RatingContainer extends React.Component {
 }
 
 if (DOM_CONTAINER) {
-	DOM_CONTAINER.forEach((element) => {
-	ReactDOM.render(
-		<RatingContainer 
-			container={element}
-		/>, 
-		element
-	);
-});
+	for (var i = 0; i < DOM_CONTAINER.length; i++) {
+		ReactDOM.render(
+			<RatingContainer 
+				container={DOM_CONTAINER[i]}
+			/>, 
+			DOM_CONTAINER[i]
+		);
+	}
 }
 

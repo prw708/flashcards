@@ -94,15 +94,7 @@ var Stars = function (_React$Component) {
 				return React.createElement(
 					"div",
 					{ className: "mb-2" },
-					React.createElement(
-						"div",
-						{ className: "spinner-border" },
-						React.createElement(
-							"span",
-							{ className: "visually-hidden" },
-							"Loading..."
-						)
-					)
+					React.createElement("div", { className: "spinner-border" })
 				);
 			} else {
 				return React.createElement(
@@ -240,9 +232,9 @@ var RatingContainer = function (_React$Component2) {
 }(React.Component);
 
 if (DOM_CONTAINER) {
-	DOM_CONTAINER.forEach(function (element) {
+	for (var i = 0; i < DOM_CONTAINER.length; i++) {
 		ReactDOM.render(React.createElement(RatingContainer, {
-			container: element
-		}), element);
-	});
+			container: DOM_CONTAINER[i]
+		}), DOM_CONTAINER[i]);
+	}
 }
