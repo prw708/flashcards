@@ -11774,7 +11774,7 @@ nav.dropdown-menu-dark {
   left: -2000px;
 }
 
-.comment-text {
+.preserve-white-space, .comment-text {
   font-family: Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   white-space: pre-wrap;
 }
